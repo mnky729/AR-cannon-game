@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AR Cannon Game</title>
+  <meta charset="utf-8" />
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+
+  <!-- Load your components -->
+  <script src="components/hit-feedback.js"></script>
+  <script src="components/health-system.js"></script>
+  <script src="components/sound-manager.js"></script>
+  <script src="components/countdown-manager.js"></script>
+</head>
+<body style="margin: 0; overflow: hidden;">
+  <a-scene embedded
+    vr-mode-ui="enabled: false"
+    arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3_PARITY65">
+
+    <a-assets>
+      <a-asset-item id="cannonModel" src="assets/cannon.glb"></a-asset-item>
+      <img id="cannonImgGreen" src="assets/cannon_green.jpg">
+      <img id="cannonImgBlue" src="assets/cannon_blue.jpg">
+      <audio id="background" src="assets/background.mp3" preload="auto"></audio>
+    </a-assets>
+
+    <!-- Background sound -->
+    <a-sound src="#background" autoplay="true" loop="true"></a-sound>
+
+    <a-entity countdown-manager></a-entity>
+
+    <!-- Green Marker -->
+    <a-marker type="barcode" value="0" id="greenMarker">
+      <a-text
+        id="greenTimer"
+        position="0 0 -1"
+        rotation="-90 180 0"
+        align="center"
+        color="#0f0"
+        scale="2 2 2"
+        value="">
+      </a-text>
+
+      <a-plane
+        src="#cannonImgGreen"
+        rotation="-90 -180 0"
+        position="0 -0.1 0"
+        width="1"
+        height="1">
+      </a-plane>
+
+      <!-- Give an ID to the hit feedback plane -->
+      <a-plane
+        id="greenHitPlane"
+        position="0 -0.11 0"
+        rotation="-90 -180 0"
+        width="1.1"
+        height="1.1"
+        material="color: red; opacity:0.5"
+        hit-feedback>
+      </a-plane>
+
+      <a-entity
+        id="greenCannon"
+        gltf-model="#cannonModel"
+        position="0 0 0"
+        rotation="0 -90 0"
+        scale="0.8 0.8 0.8"
+        health-system
+        sound-manager>
+      </a-entity>
+
+      <a-entity
+        id="greenBall"
+        geometry="primitive: sphere; radius: 0.2"
+        material="color: green"
+        visible="false"
+        position="0 0.15 0.5">
+      </a-entity>
+
+      <a-entity
+        id="greenTarget"
+        class="target"
+        position="0 0 -10"
+        scale="0.1 0.1 0.1"
+        geometry="primitive: box"
+        material="color: green; opacity: 0; transparent: true">
+      </a-entity>
+    </a-marker>
+
+    <!-- Blue Marker -->
+    <a-marker type="barcode" value="6" id="blueMarker">
+      <a-text
+        id="blueTimer"
+        position="0 0 1"
+        rotation="-90 180 180"
+        align="center"
+        color="#00f"
+        scale="2 2 2"
+        value="">
+      </a-text>
+
+      <a-plane
+        src="#cannonImgBlue"
+        rotation="-90 0 0"
+        position="0 -0.1 0"
+        width="1"
+        height="1">
+      </a-plane>
+
+      <!-- ID for hit feedback plane -->
+      <a-plane
+        id="blueHitPlane"
+        position="0 -0.11 0"
+        rotation="-90 0 0"
+        width="1.1"
+        height="1.1"
+        material="color: red; opacity:0.5"
+        hit-feedback>
+      </a-plane>
+
+      <a-entity
+        id="blueCannon"
+        gltf-model="#cannonModel"
+        position="0 0 0"
+        rotation="0 -90 0"
+        scale="0.8 0.8 0.8"
+        health-system
+        sound-manager>
+      </a-entity>
+
+      <a-entity
+        id="blueBall"
+        geometry="primitive: sphere; radius: 0.2"
+        material="color: blue"
+        visible="false"
+        position="0 0.15 -0.5">
+      </a-entity>
+
+      <a-entity
+        id="blueTarget"
+        class="target"
+        position="0 0 -10"
+        scale="0.1 0.1 0.1"
+        geometry="primitive: box"
+        material="color: blue; opacity: 0; transparent: true">
+      </a-entity>
+    </a-marker>
+
+    <a-entity camera></a-entity>
+  </a-scene>
+</body>
+</html>
