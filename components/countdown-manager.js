@@ -2,7 +2,7 @@ AFRAME.registerComponent('countdown-manager', {
     init: function () {
       this.isGreenTurn = true;
       this.countdown = 5;
-      this.isRunning = false;
+      this.isRunning = true;
   
       this.greenText = document.querySelector('#greenTimer');
       this.blueText = document.querySelector('#blueTimer');
@@ -15,38 +15,12 @@ AFRAME.registerComponent('countdown-manager', {
   
       this.greenMarker = document.querySelector('#greenMarker');
       this.blueMarker = document.querySelector('#blueMarker');
-  
-      // When a marker is found, start or resume the game
-      this.greenMarker.addEventListener('markerFound', () => { this.onMarkerFound(); });
-      this.blueMarker.addEventListener('markerFound', () => { this.onMarkerFound(); });
-  
-      // When a marker is lost, pause the game
-      this.greenMarker.addEventListener('markerLost', () => { this.onMarkerLost(); });
-      this.blueMarker.addEventListener('markerLost', () => { this.onMarkerLost(); });
+      this.startCountdown();
+
     },
+
   
-    onMarkerFound: function() {
-      // If the game isn't running, start or resume countdown
-      if (!this.isRunning) {
-        this.isRunning = true;
-        this.startCountdown();
-      }
-    },
-  
-    onMarkerLost: function() {
-      // If both markers are lost, pause the game
-      // Check if at least one marker is still visible
-      const greenVisible = this.greenMarker && this.greenMarker.isConnected && this.greenMarker.object3D.visible;
-      const blueVisible = this.blueMarker && this.blueMarker.isConnected && this.blueMarker.object3D.visible;
-  
-      if (!greenVisible && !blueVisible) {
-        this.isRunning = false;
-      }
-    },
-  
-    startCountdown: function () {
-      if (!this.isRunning) return; // If the game got paused, do not run
-  
+    startCountdown: function () {  
       this.countdown = 5;
       const timer = setInterval(() => {
         if (!this.isRunning) {
@@ -82,78 +56,79 @@ AFRAME.registerComponent('countdown-manager', {
         }
       }, 1000);
     },
-  
     fireCannonBall: function (ball, cannon) {
-        if (!this.isRunning) return;
         ball.setAttribute('visible', 'true');
-        cannon.emit('cannon-fired');
+      
+        // Ensure transformations are up to date
+        this.el.sceneEl.object3D.updateMatrixWorld(true);
       
         const cannonPos = cannon.object3D.position;
         const startPos = {
           x: cannonPos.x,
           y: cannonPos.y + 0.2,
-          z: cannonPos.z
+          z: cannonPos.z + 0.9,
         };
+      
         ball.setAttribute('position', startPos);
       
         let time = 0;
+        const maxTime = 5; // 5 seconds, adjust if needed
+      
+        // Adjust these parameters to make the ball travel further
         const gravity = 9.8;
+        const forwardVelocity = 2; 
+        const upwardVelocity = 5; 
+      
         const interval = setInterval(() => {
-          if (!this.isRunning) {
-            clearInterval(interval);
-            ball.setAttribute('visible', 'false');
-            return;
-          }
+          this.el.sceneEl.object3D.updateMatrixWorld(true);
       
           time += 0.05;
-          // Adjust projectile logic for forward speed and arc:
-          let newY = startPos.y + (2 * time) - (0.5 * gravity * time * time);
-          let newZ = startPos.z - (0.3 * time * 30);
-          let newX = startPos.x;
+      
+          // Calculate new position
+          const newX = startPos.x;
+          const newY = startPos.y + upwardVelocity * time - 0.5 * gravity * time * time;
+          const newZ = startPos.z + forwardVelocity * time;
+      
           ball.setAttribute('position', { x: newX, y: newY, z: newZ });
       
-          if (newY <= 0 || newZ < -15) {
+          // Debug: Log the position
+          console.log(`Ball position: x=${newX} y=${newY} z=${newZ}`);
+      
+          // If we've exceeded the maxTime, stop the ball anyway
+          if (time > maxTime) {
             clearInterval(interval);
             ball.setAttribute('visible', 'false');
             ball.setAttribute('position', { x: 0, y: 0.2, z: 0 });
+            return;
+          }
       
-            // Determine the target based on turn
-            const target = this.isGreenTurn ? this.blueTarget : this.greenTarget;
-            const cannonToHit = this.isGreenTurn ? this.blueCannon : this.greenCannon;
+          // Check collision in world space
+          const ballWorldPos = new THREE.Vector3();
+          ball.object3D.getWorldPosition(ballWorldPos);
       
-            // Get final ball world position
-            const ballWorldPos = new THREE.Vector3();
-            ball.object3D.getWorldPosition(ballWorldPos);
-      
-            // Get target world position
+          const targets = document.querySelectorAll('.target');
+          let hit = false;
+          targets.forEach(target => {
             const targetWorldPos = new THREE.Vector3();
             target.object3D.getWorldPosition(targetWorldPos);
       
-            // Compute distance
             const distance = ballWorldPos.distanceTo(targetWorldPos);
-            const hitThreshold = 1.0; // Adjust as needed for your scene scale
-      
-            if (distance < hitThreshold) {
-              // Ball landed close enough to target: consider it a hit
-      
-              // Identify the correct hit plane
-              const isBlueTarget = target.id.includes('blue');
-              const hitPlane = document.querySelector(isBlueTarget ? '#blueHitPlane' : '#greenHitPlane');
-              hitPlane.emit('hit');
-      
+            if (distance <= 0.5) {
               target.emit('hit');
-              cannonToHit.emit('hit');
-      
-              setTimeout(() => {
-                this.el.sceneEl.emit('firing-complete');
-              }, 1000);
-            } else {
-              // Missed the target, no hit feedback or health deduction
-              setTimeout(() => {
-                this.el.sceneEl.emit('firing-complete');
-              }, 500);
+              hit = true;
             }
+          });
+      
+          if (hit) {
+            clearInterval(interval);
+            ball.setAttribute('visible', 'false');
+            ball.setAttribute('position', { x: 0, y: 0.2, z: 0 });
           }
+      
         }, 50);
       }
+      
+      
+      
+      
   });

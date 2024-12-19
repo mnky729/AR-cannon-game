@@ -16,6 +16,15 @@ AFRAME.registerComponent('health-system', {
   
       this.el.addEventListener('hit', () => {
         this.deductHealth();
+  
+        // Show red feedback plane (assuming it's the parent's child)
+        const redFeedback = document.querySelector('#redFeedback');
+        if (redFeedback) {
+          redFeedback.setAttribute('visible', true);
+          setTimeout(() => {
+            redFeedback.setAttribute('visible', false);
+          }, 1000);
+        }
       });
   
       this.el.addEventListener('game-over', () => {
@@ -35,3 +44,4 @@ AFRAME.registerComponent('health-system', {
       this.healthText.setAttribute('text', 'value', message);
     }
   });
+  
