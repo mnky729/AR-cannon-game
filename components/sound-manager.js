@@ -8,7 +8,6 @@ AFRAME.registerComponent('sound-manager', {
     this.fireSound = new Audio('./assets/cannon-fire.mp3');
 
     this.el.addEventListener('cannon-fired', () => {
-      console.log("cannon-fired event received by sound-manager");
       this.fireSound.play();
     });
   }

@@ -6,7 +6,6 @@
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 
-  <!-- Remove inline definitions and just rely on external components -->
   <script src="components/hit-feedback.js"></script>
   <script src="components/health-system.js"></script>
   <script src="components/sound-manager.js"></script>
@@ -25,7 +24,16 @@
     </a-assets>
 
     <!-- Background sound -->
-    <a-sound src="#background" autoplay="true" loop="true"></a-sound>
+    <a-sound id="backgroundSound" src="#background" autoplay="true" loop="true"></a-sound>
+
+    <!-- Large PAUSED text initially hidden -->
+    <a-text id="pauseText"
+            value="PAUSED"
+            visible="false"
+            position="0 1 -2"
+            scale="4 4 4"
+            color="#FFF"
+            align="center"></a-text>
 
     <a-entity countdown-manager></a-entity>
 
@@ -140,7 +148,6 @@
           visible="false"
           position="0 0.15 -0.5"
           collision-check="targetSelector: .target; threshold: 2">
-
         </a-entity>
       </a-entity>
 
