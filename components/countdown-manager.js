@@ -58,10 +58,14 @@ AFRAME.registerComponent('countdown-manager', {
     },
     fireCannonBall: function (ball, cannon) {
         ball.setAttribute('visible', 'true');
+        console.log("Emitting cannon-fired on:", cannon);
+        cannon.emit('cannon-fired');
+
       
         // Ensure transformations are up to date
         this.el.sceneEl.object3D.updateMatrixWorld(true);
       
+        // Original start position logic (unchanged)
         const cannonPos = cannon.object3D.position;
         const startPos = {
           x: cannonPos.x,
@@ -72,19 +76,17 @@ AFRAME.registerComponent('countdown-manager', {
         ball.setAttribute('position', startPos);
       
         let time = 0;
-        const maxTime = 5; // 5 seconds, adjust if needed
       
-        // Adjust these parameters to make the ball travel further
-        const gravity = 9.8;
-        const forwardVelocity = 2; 
-        const upwardVelocity = 5; 
-      
+        // Simulate projectile motion (parabolic arc)
         const interval = setInterval(() => {
-          this.el.sceneEl.object3D.updateMatrixWorld(true);
+          this.el.sceneEl.object3D.updateMatrixWorld(true); // Update before reading positions
       
           time += 0.05;
       
-          // Calculate new position
+          const gravity = 9.8; // Gravity
+          const forwardVelocity = 2; 
+          const upwardVelocity = 5; 
+      
           const newX = startPos.x;
           const newY = startPos.y + upwardVelocity * time - 0.5 * gravity * time * time;
           const newZ = startPos.z + forwardVelocity * time;
@@ -94,18 +96,19 @@ AFRAME.registerComponent('countdown-manager', {
           // Debug: Log the position
           console.log(`Ball position: x=${newX} y=${newY} z=${newZ}`);
       
-          // If we've exceeded the maxTime, stop the ball anyway
-          if (time > maxTime) {
+          // Check if ball hits ground
+          if (newY <= 0) {
             clearInterval(interval);
             ball.setAttribute('visible', 'false');
             ball.setAttribute('position', { x: 0, y: 0.2, z: 0 });
             return;
           }
       
-          // Check collision in world space
+          // Get world position of the ball
           const ballWorldPos = new THREE.Vector3();
           ball.object3D.getWorldPosition(ballWorldPos);
       
+          // Check collision with targets
           const targets = document.querySelectorAll('.target');
           let hit = false;
           targets.forEach(target => {
@@ -113,7 +116,11 @@ AFRAME.registerComponent('countdown-manager', {
             target.object3D.getWorldPosition(targetWorldPos);
       
             const distance = ballWorldPos.distanceTo(targetWorldPos);
-            if (distance <= 0.5) {
+            console.log(`Checking collision. Ball: ${ballWorldPos.x.toFixed(2)}, ${ballWorldPos.y.toFixed(2)}, ${ballWorldPos.z.toFixed(2)} | Target: ${targetWorldPos.x.toFixed(2)}, ${targetWorldPos.y.toFixed(2)}, ${targetWorldPos.z.toFixed(2)} | Distance: ${distance.toFixed(2)}`);
+      
+            // Dramatically increased threshold for testing
+            if (distance <= 10) {
+              console.log("HIT DETECTED AT LARGE THRESHOLD");
               target.emit('hit');
               hit = true;
             }
@@ -127,6 +134,7 @@ AFRAME.registerComponent('countdown-manager', {
       
         }, 50);
       }
+      
       
       
       
