@@ -13,27 +13,16 @@
 </head>
 <body style="margin: 0; overflow: hidden;">
   <a-scene embedded
-    vr-mode-ui="enabled: false"
-    arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3_PARITY65">
+           vr-mode-ui="enabled: false"
+           arjs="sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 3x3_PARITY65">
 
     <a-assets>
       <a-asset-item id="cannonModel" src="assets/cannon.glb"></a-asset-item>
       <img id="cannonImgGreen" src="assets/cannon_green.jpg">
       <img id="cannonImgBlue" src="assets/cannon_blue.jpg">
       <audio id="background" src="assets/background.mp3" preload="auto"></audio>
+      <audio id="pauseMusic" src="assets/pause_music.mp3" preload="auto"></audio>
     </a-assets>
-
-    <!-- Background sound -->
-    <a-sound id="backgroundSound" src="#background" autoplay="true" loop="true"></a-sound>
-
-    <!-- Large PAUSED text initially hidden -->
-    <a-text id="pauseText"
-            value="PAUSED"
-            visible="false"
-            position="0 1 -2"
-            scale="4 4 4"
-            color="#FFF"
-            align="center"></a-text>
 
     <a-entity countdown-manager></a-entity>
 
@@ -57,7 +46,6 @@
         height="1">
       </a-plane>
 
-      <!-- Red Feedback Plane for Green side -->
       <a-plane
         id="greenHitPlane"
         position="0 -0.11 0"
@@ -78,7 +66,7 @@
         health-system
         sound-manager>
 
-        <!-- Green Ball (child of greenCannon) -->
+        <!-- Green Ball -->
         <a-entity
           id="greenBall"
           geometry="primitive: sphere; radius: 0.2"
@@ -119,7 +107,6 @@
         height="1">
       </a-plane>
 
-      <!-- Red Feedback Plane for Blue side -->
       <a-plane
         id="blueHitPlane"
         position="0 -0.11 0"
@@ -140,7 +127,7 @@
         health-system
         sound-manager>
 
-        <!-- Blue Ball (child of blueCannon) -->
+        <!-- Blue Ball -->
         <a-entity
           id="blueBall"
           geometry="primitive: sphere; radius: 0.2"
@@ -161,7 +148,17 @@
       </a-entity>
     </a-marker>
 
-    <a-entity camera></a-entity>
+    <a-entity camera>
+      <a-text
+        id="pauseText"
+        value="PAUSED"
+        visible="false"
+        position="0 0 -1"
+        scale="2 2 2"
+        color="red"
+        align="center">
+      </a-text>
+    </a-entity>
   </a-scene>
 </body>
 </html>
