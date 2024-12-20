@@ -53,7 +53,6 @@ AFRAME.registerComponent('countdown-manager', {
     }
   },
 
-  // countdown-manager.js 
   onMarkerLost: function () {
     const greenVisible = this.greenMarker && this.greenMarker.object3D.visible;
     const blueVisible = this.blueMarker && this.blueMarker.object3D.visible;
@@ -190,8 +189,7 @@ AFRAME.registerComponent('countdown-manager', {
         const distance = ballWorldPos.distanceTo(targetWorldPos);
         console.log(`Checking collision. Ball: ${ballWorldPos.x.toFixed(2)}, ${ballWorldPos.y.toFixed(2)}, ${ballWorldPos.z.toFixed(2)} | Target: ${targetWorldPos.x.toFixed(2)}, ${targetWorldPos.y.toFixed(2)}, ${targetWorldPos.z.toFixed(2)} | Distance: ${distance.toFixed(2)}`);
 
-        if (distance <= 10) {
-          console.log("HIT DETECTED AT LARGE THRESHOLD");
+        if (distance <= 8) {
           target.emit('hit');
           hit = true;
         }

@@ -16,7 +16,7 @@
            sound-manager
            vr-mode-ui="enabled: false"
            arjs="sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 3x3_PARITY65">
-
+  
     <a-assets>
       <a-asset-item id="cannonModel" src="assets/cannon.glb"></a-asset-item>
       <img id="cannonImgGreen" src="assets/cannon_green.jpg">
@@ -58,14 +58,15 @@
         hit-feedback>
       </a-plane>
 
+      <!-- Cannon now has health-system again -->
       <a-entity
         id="greenCannon"
         gltf-model="#cannonModel"
         position="0 0 0"
         rotation="0 -90 0"
         scale="0.8 0.8 0.8"
-        health-system>
-
+        health-system>  <!-- Attached here so health bar appears above the cannon -->
+        
         <!-- Green Ball -->
         <a-entity
           id="greenBall"
@@ -75,15 +76,16 @@
           position="0 0.15 0.5"
           collision-check="targetSelector: .target; threshold: 2">
         </a-entity>
-      </a-entity>
-
-      <a-entity
-        id="greenTarget"
-        class="target"
-        position="0 0 -10"
-        scale="5 5 5"
-        geometry="primitive: box"
-        material="color: green; opacity: 0; transparent: true">
+        
+        <!-- Move the green target inside the cannon entity so event bubbles up -->
+        <a-entity
+          id="greenTarget"
+          class="target"
+          position="0 0 -10"
+          scale="5 5 5"
+          geometry="primitive: box"
+          material="color: green; opacity: 0; transparent: true">
+        </a-entity>
       </a-entity>
     </a-marker>
 
@@ -118,6 +120,7 @@
         hit-feedback>
       </a-plane>
 
+      <!-- Cannon has health-system as well -->
       <a-entity
         id="blueCannon"
         gltf-model="#cannonModel"
@@ -135,15 +138,16 @@
           position="0 0.15 -0.5"
           collision-check="targetSelector: .target; threshold: 2">
         </a-entity>
-      </a-entity>
 
-      <a-entity
-        id="blueTarget"
-        class="target"
-        position="0 0 -10"
-        scale="5 5 5"
-        geometry="primitive: box"
-        material="color: blue; opacity: 0; transparent: true">
+        <!-- Place the blue target inside the blue cannon -->
+        <a-entity
+          id="blueTarget"
+          class="target"
+          position="0 0 -10"
+          scale="5 5 5"
+          geometry="primitive: box"
+          material="color: blue; opacity: 0; transparent: true">
+        </a-entity>
       </a-entity>
     </a-marker>
 
@@ -153,7 +157,7 @@
         value="PAUSED"
         visible="false"
         position="0 0 -1"
-        scale="2 2 2"
+        scale="1 1 1"
         color="red"
         align="center">
       </a-text>
