@@ -6,5 +6,10 @@ AFRAME.registerComponent('sound-manager', {
       this.fireSound.currentTime = 0; // Ensure starts at beginning
       this.fireSound.play();
     });
+
+    this.el.addEventListener('countdown', () => {
+      const countdownSound = new Audio('./assets/countdown.mp3');
+      countdownSound.play();
+    });
   }
 });
