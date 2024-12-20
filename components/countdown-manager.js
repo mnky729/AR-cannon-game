@@ -2,9 +2,10 @@ AFRAME.registerComponent('countdown-manager', {
   init: function () {
     this.isGreenTurn = true;
     this.countdown = 5;
-    this.isRunning = false; 
+    this.isRunning = false;
     this.hasStarted = false;
     this.timer = null;
+    this.hasPlayedCountdownThisTurn = false; // New flag
 
     this.greenText = document.querySelector('#greenTimer');
     this.blueText = document.querySelector('#blueTimer');
@@ -16,7 +17,6 @@ AFRAME.registerComponent('countdown-manager', {
     this.blueTarget = document.querySelector('#blueTarget');
     this.pauseText = document.querySelector('#pauseText');
 
-    // Handle audio directly
     this.backgroundAudio = document.querySelector('#background');
     this.pauseAudio = document.querySelector('#pauseMusic');
 
@@ -34,19 +34,16 @@ AFRAME.registerComponent('countdown-manager', {
       this.isRunning = true;
       this.pauseText.setAttribute('visible', false);
 
-      // Stop pause music if playing
       if (!this.pauseAudio.paused) {
         this.pauseAudio.pause();
         this.pauseAudio.currentTime = 0;
       }
 
-      // If never started background before, start now
       if (!this.hasStarted) {
         this.backgroundAudio.loop = true;
         this.backgroundAudio.play();
         this.hasStarted = true;
       } else {
-        // Resume background if it was paused
         if (this.backgroundAudio.paused) {
           this.backgroundAudio.play();
         }
@@ -56,6 +53,7 @@ AFRAME.registerComponent('countdown-manager', {
     }
   },
 
+  // countdown-manager.js 
   onMarkerLost: function () {
     const greenVisible = this.greenMarker && this.greenMarker.object3D.visible;
     const blueVisible = this.blueMarker && this.blueMarker.object3D.visible;
@@ -64,16 +62,17 @@ AFRAME.registerComponent('countdown-manager', {
       this.isRunning = false;
       this.pauseText.setAttribute('visible', true);
 
-      // Pause background audio
       if (!this.backgroundAudio.paused) {
         this.backgroundAudio.pause();
       }
 
-      // Play pause music if not playing
       if (this.pauseAudio.paused) {
         this.pauseAudio.loop = true;
         this.pauseAudio.play();
       }
+
+      // Emit pause-all-sounds event on scene so sound-manager receives it
+      this.el.sceneEl.emit('pause-all-sounds');
 
       if (this.timer) {
         clearInterval(this.timer);
@@ -82,19 +81,23 @@ AFRAME.registerComponent('countdown-manager', {
     }
   },
 
+
   startCountdown: function () {
     if (!this.isRunning || this.timer) return;
-  
-    // Emit the 'countdown' event to trigger the countdown sound
-    this.el.sceneEl.emit('countdown');
-  
+
+    // Only play the countdown sound if we haven't played it yet this turn
+    if (!this.hasPlayedCountdownThisTurn) {
+      this.el.sceneEl.emit('countdown');
+      this.hasPlayedCountdownThisTurn = true;
+    }
+
     this.timer = setInterval(() => {
       if (!this.isRunning) {
         clearInterval(this.timer);
         this.timer = null;
         return;
       }
-  
+
       if (this.isGreenTurn) {
         this.greenText.setAttribute('value', this.countdown.toString());
         this.blueText.setAttribute('value', '');
@@ -102,23 +105,27 @@ AFRAME.registerComponent('countdown-manager', {
         this.blueText.setAttribute('value', this.countdown.toString());
         this.greenText.setAttribute('value', '');
       }
-  
+
       this.countdown--;
-  
+
       if (this.countdown < 0) {
         clearInterval(this.timer);
         this.timer = null;
         if (!this.isRunning) return;
-  
+
         this.fireCannonBall(
           this.isGreenTurn ? this.greenBall : this.blueBall,
           this.isGreenTurn ? this.greenCannon : this.blueCannon
         );
-  
+
         setTimeout(() => {
           if (!this.isRunning) return;
           this.isGreenTurn = !this.isGreenTurn;
-          this.countdown = 5; 
+
+          // Turn changed, reset the flag so we can play countdown sound next turn
+          this.hasPlayedCountdownThisTurn = false;
+
+          this.countdown = 5;
           this.startCountdown();
         }, 500);
       }
@@ -171,6 +178,7 @@ AFRAME.registerComponent('countdown-manager', {
         return;
       }
 
+      // Collision logic remains the same
       const ballWorldPos = new THREE.Vector3();
       ball.object3D.getWorldPosition(ballWorldPos);
 
